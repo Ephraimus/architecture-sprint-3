@@ -1,0 +1,25 @@
+@startuml
+!define RECTANGLE_COLOR #ADD8E6
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(device_management, "Device Management Service") {
+    Component(api_device, "API Component", "FastAPI", "Прием и обработка запросов для управления устройствами")
+    Component(command_processor_device, "Command Processor", "Python", "Обработка команд и выполнение бизнес-логики для устройств")
+    Component(state_repository_device, "State Repository", "Python", "Управление состоянием устройств, включая чтение и запись данных")
+    ComponentDb(device_state_db, "Device State Database", "PostgreSQL", "Хранение состояния всех устройств")
+
+    api_device -> command_processor_device : "Получение команд управления устройствами"
+    command_processor_device -> state_repository_device : "Обновление состояния устройств"
+    state_repository_device -> device_state_db : "Чтение/Запись состояния устройств"
+}
+
+' Модули устройства
+Component(heating_module, "Heating Module", "Python", "Обработка логики управления отоплением")
+Component(lighting_module, "Lighting Module", "Python", "Обработка логики управления освещением")
+Component(surveillance_module, "Surveillance Module", "Python", "Обработка логики управления камерами")
+
+command_processor_device --> heating_module : "Обработка команд управления отоплением"
+command_processor_device --> lighting_module : "Обработка команд управления освещением"
+command_processor_device --> surveillance_module : "Обработка команд управления камерами"
+@enduml
+

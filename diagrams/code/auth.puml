@@ -1,0 +1,43 @@
+@startuml
+title Authentication and Authorization Service Code Diagram
+' Диаграмма кода для критических частей службы аутентификации и авторизации
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class AuthAPI {
+  +login(UserCredentials credentials): AuthToken
+  +validateToken(String token): boolean
+  +logout(String token): void
+}
+
+class UserCredentials {
+  +String username
+  +String password
+}
+
+class AuthService {
+  +AuthToken authenticate(UserCredentials credentials)
+  +boolean validate(AuthToken token)
+  +void invalidate(AuthToken token)
+}
+
+class AuthToken {
+  +String uuid
+  +LocalDateTime issuedAt
+  +LocalDateTime expiresAt
+}
+
+class TokenRepository {
+  +saveToken(AuthToken token): void
+  +AuthToken getToken(String uuid): AuthToken
+  +void deleteToken(String uuid): void
+}
+
+AuthAPI --> AuthService : authenticate user
+AuthAPI --> AuthService : validate token
+AuthAPI --> AuthService : logout user
+AuthService --> TokenRepository : save, validate, delete tokens
+
+@enduml

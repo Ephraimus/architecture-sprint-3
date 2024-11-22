@@ -1,0 +1,17 @@
+@startuml
+
+!define RECTANGLE_COLOR #ADD8E6
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(notification_service, "Notification Service") {
+    Component(api_notification, "API Component", "FastAPI", "Прием и обработка запросов на отправку уведомлений")
+    Component(notification_handler, "Notification Handler", "Python", "Обработка уведомлений и выполнение логики отправки")
+    Component(state_repository_notification, "State Repository", "Python", "Управление состоянием уведомлений, включая чтение и запись данных в базу данных")
+    ComponentDb(state_db_notification_service, "Notification State Database", "PostgreSQL", "Хранение состояния уведомлений")
+
+    api_notification -> notification_handler : "Получение запросов на отправку уведомлений"
+    notification_handler -> state_repository_notification : "Обновление состояния уведомлений"
+    state_repository_notification -> state_db_notification_service : "Чтение/Запись состояния уведомлений"
+}
+
+@enduml

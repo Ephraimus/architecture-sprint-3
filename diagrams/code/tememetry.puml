@@ -1,0 +1,45 @@
+@startuml
+title Telemetry Service Code Diagram
+' Диаграмма кода для критических частей службы телеметрии
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class TelemetryAPI {
+  +submitTelemetryData(TelemetryData data): void
+  +getTelemetryReport(ReportRequest request): TelemetryReport
+}
+
+class TelemetryData {
+  +String uuid
+  +Map<String, Object> metrics
+  +LocalDateTime timestamp
+}
+
+class ValidationService {
+  +boolean validate(TelemetryData data)
+}
+
+class DataAggregator {
+  +aggregate(TelemetryData data): AggregatedTelemetry
+  +List<AggregatedTelemetry> getAggregatedData(LocalDateTime from, LocalDateTime to)
+}
+
+class StateRepository {
+  +saveTelemetryData(AggregatedTelemetry data): void
+  +AggregatedTelemetry getTelemetryData(String uuid, LocalDateTime timestamp)
+}
+
+class AggregatedTelemetry {
+  +String uuid
+  +Map<String, Double> aggregatedMetrics
+  +LocalDateTime aggregationPeriod
+}
+
+TelemetryAPI --> ValidationService : validate data
+TelemetryAPI --> DataAggregator : process data
+DataAggregator --> StateRepository : save aggregated data
+StateRepository <-- DataAggregator : read aggregated data
+
+@enduml

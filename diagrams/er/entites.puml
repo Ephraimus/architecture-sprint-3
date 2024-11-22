@@ -1,0 +1,133 @@
+@startuml
+title Logical Database Model Diagram for "Тёплый дом" (Updated with Telemetry Types)
+
+top to bottom direction
+
+entity User {
+  +uuid: UUID
+  +username: String
+  +email: String
+  +password_hash: String
+  +first_name: String
+  +last_name: String
+  +phone_number: String
+  +created_at: Timestamp
+  +updated_at: Timestamp
+  +status: Enum (ACTIVE, INACTIVE, SUSPENDED)
+}
+
+entity House {
+  +uuid: UUID
+  +user_id: UUID <<FK>>
+  +address: String
+  +name: String
+  +created_at: Timestamp
+  +updated_at: Timestamp
+}
+
+entity Device {
+  +uuid: UUID
+  +house_id: UUID <<FK>>
+  +type_id: UUID <<FK>>
+  +serial_number: String
+  +name: String
+  +location: String
+  +status: Enum (ONLINE, OFFLINE, ERROR)
+  +firmware_version: String
+  +created_at: Timestamp
+  +updated_at: Timestamp
+}
+
+entity DeviceType {
+  +uuid: UUID
+  +name: String
+  +manufacturer: String
+  +model: String
+  +supported_features: JSON
+  +description: String
+}
+
+entity Module {
+  +uuid: UUID
+  +name: String
+  +version: String
+  +description: String
+  +telemetry_types: JSON
+  +created_at: Timestamp
+  +updated_at: Timestamp
+}
+
+entity DeviceConfiguration {
+  +uuid: UUID
+  +device_id: UUID <<FK>>
+  +module_id: UUID <<FK>>
+  +configuration: JSON
+  +created_at: Timestamp
+  +updated_at: Timestamp
+}
+
+entity TelemetryData {
+  +uuid: UUID
+  +device_id: UUID <<FK>>
+  +module_id: UUID <<FK>>
+  +timestamp: Timestamp
+  +value: Float/String
+  +unit: String
+  +raw_data: JSON
+}
+
+entity Scenario {
+  +uuid: UUID
+  +user_id: UUID <<FK>>
+  +name: String
+  +description: String
+  +trigger_condition: JSON
+  +is_active: Boolean
+  +created_at: Timestamp
+  +updated_at: Timestamp
+}
+
+entity Action {
+  +uuid: UUID
+  +scenario_id: UUID <<FK>>
+  +device_id: UUID <<FK>>
+  +action_type: String
+  +parameters: JSON
+  +sequence_order: Integer
+}
+
+entity Event {
+  +uuid: UUID
+  +device_id: UUID <<FK>>
+  +event_type: String
+  +timestamp: Timestamp
+  +data: JSON
+  +processed: Boolean
+}
+
+entity Notification {
+  +uuid: UUID
+  +user_id: UUID <<FK>>
+  +event_id: UUID <<FK>>
+  +message: String
+  +sent_at: Timestamp
+  +delivery_method: Enum (EMAIL, SMS, PUSH)
+  +status: Enum (SENT, FAILED, PENDING)
+}
+
+' Connections
+User --o{ House : "1, n"
+House --o{ Device : "1, n"
+DeviceType --o{ Device : "1, n"
+Device --o{ TelemetryData : "1, n"
+TelemetryData --> Module : "*, 1"
+User --o{ Scenario : "1, n"
+Scenario --o{ Action : "1, n"
+Action --> Device : "*, 1"
+Device --o{ Event : "1, n"
+Event --o{ Notification : "1, n"
+User --o{ Notification : "1, n"
+Device --o{ DeviceConfiguration : "1, n"
+Module --o{ DeviceConfiguration : "1, n"
+
+@enduml
