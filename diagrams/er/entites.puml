@@ -1,6 +1,5 @@
 @startuml
-title Logical Database Model Diagram for "Тёплый дом"
-' Логическая модель базы данных для ключевых сущностей системы «Тёплый дом»
+title Logical Database Model Diagram for "Тёплый дом" (Updated with Telemetry Types)
 
 top to bottom direction
 
@@ -35,7 +34,6 @@ entity Device {
   +location: String
   +status: Enum (ONLINE, OFFLINE, ERROR)
   +firmware_version: String
-  +configuration: JSON
   +created_at: Timestamp
   +updated_at: Timestamp
 }
@@ -54,6 +52,16 @@ entity Module {
   +name: String
   +version: String
   +description: String
+  +telemetry_types: JSON
+  +created_at: Timestamp
+  +updated_at: Timestamp
+}
+
+entity DeviceConfiguration {
+  +uuid: UUID
+  +device_id: UUID <<FK>>
+  +module_id: UUID <<FK>>
+  +configuration: JSON
   +created_at: Timestamp
   +updated_at: Timestamp
 }
@@ -61,8 +69,8 @@ entity Module {
 entity TelemetryData {
   +uuid: UUID
   +device_id: UUID <<FK>>
+  +module_id: UUID <<FK>>
   +timestamp: Timestamp
-  +data_type: String
   +value: Float/String
   +unit: String
   +raw_data: JSON
@@ -107,23 +115,19 @@ entity Notification {
   +status: Enum (SENT, FAILED, PENDING)
 }
 
-entity DeviceModule {
-  +device_id: UUID <<FK>>
-  +module_id: UUID <<FK>>
-}
-
-' Определение связей между сущностями
+' Connections
 User --o{ House : "1, n"
 House --o{ Device : "1, n"
 DeviceType --o{ Device : "1, n"
 Device --o{ TelemetryData : "1, n"
+TelemetryData --> Module : "*, 1"
 User --o{ Scenario : "1, n"
 Scenario --o{ Action : "1, n"
 Action --> Device : "*, 1"
 Device --o{ Event : "1, n"
 Event --o{ Notification : "1, n"
 User --o{ Notification : "1, n"
-Device --o{ DeviceModule : "*, *"
-Module --o{ DeviceModule : "*, *"
+Device --o{ DeviceConfiguration : "1, n"
+Module --o{ DeviceConfiguration : "1, n"
 
 @enduml
